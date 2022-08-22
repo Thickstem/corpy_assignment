@@ -11,14 +11,12 @@ from PIL import Image
 from collections import OrderedDict
 from sklearn.metrics import roc_auc_score
 from sklearn.metrics import roc_curve
-from sklearn.covariance import LedoitWolf
 from scipy.spatial.distance import mahalanobis
 from scipy.ndimage import gaussian_filter
 
 import matplotlib.pyplot as plt
 
 import torch
-import torch.nn as nn
 import torch.nn.functional as F
 import torch.utils.data as data
 from torch.utils.data import DataLoader
@@ -81,12 +79,12 @@ def embedding_concat(x, y):
     z = z.view(B, -1, H2 * W2)
     z = F.fold(z, kernel_size=s, output_size=(H1, W1), stride=s)
 
-    return z
+    return z # dim(B,C1+C2,H1,W1)
 
 def train(dataloader,model,sampling_idx):
     outputs = []
     def hook(module, input, output):
-            outputs.append(output)
+        outputs.append(output)
     
     model.layer1[-1].register_forward_hook(hook)
     model.layer2[-1].register_forward_hook(hook)
@@ -196,8 +194,6 @@ def test(dataloader,model,sampling_idx,train_outputs):
 
 
 if __name__ =="__main__":
-    logger = setup_logger(name="screw")
-
     parser = argparse.ArgumentParser()
     parser.add_argument("--backbone",type=str,default="wide_resnet50_2")
     args = parser.parse_args()
